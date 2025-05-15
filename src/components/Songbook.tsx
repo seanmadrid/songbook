@@ -30,37 +30,67 @@ export const Songbook = () => {
   const [songs, setSongs] = useState<any[][]>([]);
   const [loading, setLoading] = useState(true);
 
-  const yearIndex = songs[0]?.findIndex(
-    (header: string) => header.toLowerCase() === "year"
+  const titleIndex = songs[0]?.findIndex(
+    (header: string) => header.toLowerCase().trim() === "title"
   );
 
-  const songsByYear =
-  yearIndex !== undefined && yearIndex !== -1
-    ? songs.slice(1).sort((a, b) => {
-        const yearA = a[yearIndex]?.toString().trim() || "";
-        const yearB = b[yearIndex]?.toString().trim() || "";
-        if (yearA === "" && yearB === "") return 0;
-        if (yearA === "") return 1;
-        if (yearB === "") return -1;
-        return yearA.localeCompare(yearB);
-      })
-    : songs.slice(1);
+  const yearIndex = songs[0]?.findIndex(
+    (header: string) => header.toLowerCase().trim() === "year"
+  );
 
   const showIndex = songs[0]?.findIndex(
-    (header: string) => header.toLowerCase() === "show"
+    (header: string) => header.toLowerCase().trim() === "show"
   );
 
+  const songsByTitle =
+    titleIndex !== undefined && titleIndex !== -1
+      ? [
+          songs[0], // Keep the header row at the top
+          ...songs
+            .slice(1) // Exclude the header row for sorting
+            .filter((row) => row[titleIndex]?.toString().trim() !== "") // Exclude rows with empty titles
+            .sort((a, b) => {
+              // Normalize titles by trimming and converting to lowercase
+              const titleA =
+                a[titleIndex]?.toString().trim().toLowerCase() || "";
+              const titleB =
+                b[titleIndex]?.toString().trim().toLowerCase() || "";
+              return titleA.localeCompare(titleB);
+            }),
+        ]
+      : songs;
+
+  console.log("songsByTitle", songsByTitle);
+
+  const songsByYear =
+    yearIndex !== undefined && yearIndex !== -1
+      ? [
+          songs[0], // Keep the header row at the top
+          ...songs.slice(1).sort((a, b) => {
+            const yearA = a[yearIndex]?.toString().trim() || "";
+            const yearB = b[yearIndex]?.toString().trim() || "";
+            if (yearA === "" && yearB === "") return 0;
+            if (yearA === "") return 1;
+            if (yearB === "") return -1;
+            return yearA.localeCompare(yearB);
+          }),
+        ]
+      : songs;
+
   const songsByShow =
-  showIndex !== undefined && showIndex !== -1
-    ? [...songs.slice(1)].sort((a, b) => {
-        const showA = a[showIndex]?.toString().toLowerCase().trim() || "";
-        const showB = b[showIndex]?.toString().toLowerCase().trim() || "";
-        if (showA === "" && showB === "") return 0;
-        if (showA === "") return 1;
-        if (showB === "") return -1;
-        return showA.localeCompare(showB);
-      })
-    : songs.slice(1);
+    showIndex !== undefined && showIndex !== -1
+      ? [
+          songs[0], // Keep the header row at the top
+          ...songs.slice(1).sort((a, b) => {
+            const showA = a[showIndex]?.toString().toLowerCase().trim() || "";
+            const showB = b[showIndex]?.toString().toLowerCase().trim() || "";
+            if (showA === "" && showB === "") return 0;
+            if (showA === "") return 1;
+            if (showB === "") return -1;
+            return showA.localeCompare(showB);
+          }),
+        ]
+      : songs;
 
   useEffect(() => {
     fetch(url)
@@ -78,23 +108,23 @@ export const Songbook = () => {
   if (loading) {
     return (
       <VStack
-        w="100vw"
-        h="100vh"
-        alignItems="center"
-        justifyContent="center"
-        gap="24px"
+        w='100vw'
+        h='100vh'
+        alignItems='center'
+        justifyContent='center'
+        gap='24px'
       >
         <ScaleLoader
-          color="var(--foreground)"
-          width="25"
-          height="65"
+          color='var(--foreground)'
+          width='25'
+          height='65'
           speedMultiplier={0.6666}
         />
         <Text
           fontFamily='"Ojuju", serif'
-          color="var(--foreground)"
-          fontWeight="bold"
-          fontSize="24px"
+          color='var(--foreground)'
+          fontWeight='bold'
+          fontSize='24px'
         >
           Loading...
         </Text>
@@ -109,9 +139,9 @@ export const Songbook = () => {
   };
 
   return (
-    <VStack bg="var(--background)">
-      <Tabs w="100%" variant="soft-rounded">
-        <TabList bg="var(--background-alt)" p="16px" flexWrap="wrap" gap="8px">
+    <VStack bg='var(--background)'>
+      <Tabs w='100%' variant='soft-rounded'>
+        <TabList bg='var(--background-alt)' p='16px' flexWrap='wrap' gap='8px'>
           <Styled.Tab _selected={selectedTabStyle}>
             <Icon as={FaMusic} /> Title
           </Styled.Tab>
@@ -125,18 +155,18 @@ export const Songbook = () => {
           </Styled.Tab>
         </TabList>
 
-        <TabPanels overflowX="auto">
-          <TabPanel padding="0">
-            <Table variant="simple" margin="0" padding="0">
+        <TabPanels overflowX='auto'>
+          <TabPanel padding='0'>
+            <Table variant='simple' margin='0' padding='0'>
               <Thead>
                 <Tr>
-                  {songs[0]?.map((header: string, index: number) => (
+                  {songsByTitle[0]?.map((header: string, index: number) => (
                     <Th
                       key={index}
                       fontFamily='"Ojuju", serif'
-                      textTransform="capitalize"
-                      fontSize="xl"
-                      color="var(--foreground)"
+                      textTransform='capitalize'
+                      fontSize='xl'
+                      color='var(--foreground)'
                     >
                       {header}
                     </Th>
@@ -144,7 +174,7 @@ export const Songbook = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {songs.slice(1).map((row: any[], rowIndex: number) => (
+                {songsByTitle.slice(1).map((row: any[], rowIndex: number) => (
                   <Tr
                     key={rowIndex}
                     bg={
@@ -166,17 +196,17 @@ export const Songbook = () => {
               </Tbody>
             </Table>
           </TabPanel>
-          <TabPanel padding="0">
-            <Table variant="simple" margin="0" padding="0">
+          <TabPanel padding='0'>
+            <Table variant='simple' margin='0' padding='0'>
               <Thead>
                 <Tr>
-                  {songs[0]?.map((header: string, index: number) => (
+                  {songsByYear[0]?.map((header: string, index: number) => (
                     <Th
                       key={index}
                       fontFamily='"Ojuju", serif'
-                      textTransform="capitalize"
-                      fontSize="xl"
-                      color="var(--foreground)"
+                      textTransform='capitalize'
+                      fontSize='xl'
+                      color='var(--foreground)'
                     >
                       {header}
                     </Th>
@@ -184,7 +214,7 @@ export const Songbook = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {songsByYear.map((row: any[], rowIndex: number) => (
+                {songsByYear.slice(1).map((row: any[], rowIndex: number) => (
                   <Tr
                     key={rowIndex}
                     bg={
@@ -206,17 +236,17 @@ export const Songbook = () => {
               </Tbody>
             </Table>
           </TabPanel>
-          <TabPanel padding="0">
-            <Table variant="simple" margin="0" padding="0">
+          <TabPanel padding='0'>
+            <Table variant='simple' margin='0' padding='0'>
               <Thead>
                 <Tr>
-                  {songs[0]?.map((header: string, index: number) => (
+                  {songsByShow[0]?.map((header: string, index: number) => (
                     <Th
                       key={index}
                       fontFamily='"Ojuju", serif'
-                      textTransform="capitalize"
-                      fontSize="xl"
-                      color="var(--foreground)"
+                      textTransform='capitalize'
+                      fontSize='xl'
+                      color='var(--foreground)'
                     >
                       {header}
                     </Th>
@@ -224,7 +254,7 @@ export const Songbook = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {songsByShow.map((row: any[], rowIndex: number) => (
+                {songsByShow.slice(1).map((row: any[], rowIndex: number) => (
                   <Tr
                     key={rowIndex}
                     bg={
