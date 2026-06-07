@@ -28,10 +28,12 @@ const isValidSongs = (songs: any[][]) =>
   Array.isArray(songs[0]) &&
   songs[0].filter((cell: any) => !!cell && cell.toString().trim() !== "").length > 0;
 
-// Helper to get column index by header name
+// Helper to get column index by header name.
+// Matches loosely (header contains the name) so header text variations
+// like "Show/Film" still resolve to the "show" column.
 const getColumnIndex = (headers: string[], name: string) =>
   headers.findIndex(
-    (header) => header?.toLowerCase().trim() === name.toLowerCase()
+    (header) => header?.toLowerCase().trim().includes(name.toLowerCase())
   );
 
 // Helper to render a table
